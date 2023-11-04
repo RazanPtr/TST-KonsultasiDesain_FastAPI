@@ -1,0 +1,72 @@
+{
+    "desain": [
+        {
+            "name": "minimalist",
+            "deskripsi": "desain ini cocok untuk halaman berukuran kecil",
+            "tanggalpesan": "11-02-2023",
+            "status": "on progress",
+            "id": 1
+        },
+        {
+            "name": "oldgarden",
+            "deskripsi": "desain dengan gaya lama",
+            "tanggalpesan": "15-05-2023",
+            "status": "under review",
+            "id": 2
+        },
+        {
+            "name": "greendays",
+            "deskripsi": "desain dengan nuansa penuh kehijauan",
+            "tanggalpesan": "10-09-2023",
+            "status": "on progress",
+            "id": 3
+        },
+        {
+            "name": "modern",
+            "deskripsi": "desain dengan gaya kekinian",
+            "tanggalpesan": "21-09-2022",
+            "status": "completed",
+            "id": 4
+        }
+    ],
+    "permintaan": [
+        {
+            "id": 1,
+            "id_desainer": 1
+        },
+        {
+            "id": 2,
+            "id_desainer": 2
+        },
+        {
+            "id": 3,
+            "id_desainer": 3
+        },
+        {
+            "id": 4,
+            "id_desainer": 4
+        }
+    ],
+    "konsuldesain": [
+        {
+            "nama": "budi",
+            "nohp": 6287787624213,
+            "id_desainer": 1
+        },
+        {
+            "nama": "asep",
+            "nohp": 6285921029201,
+            "id_desainer": 2
+        },
+        {
+            "nama": "yusep",
+            "nohp": 621334567865,
+            "id_desainer": 3
+        },
+        {
+            "nama": "udin",
+            "nohp": 6287899215549,
+            "id_desainer": 4
+        }
+    ]
+}
