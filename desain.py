@@ -19,7 +19,7 @@ class Konsul(BaseModel):
 	nama: str
 	nohp: int
 
-json_filename="./app/desain.json"
+json_filename="desain.json"
 
 with open(json_filename,"r") as read_file:
 	data = json.load(read_file)
