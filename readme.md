@@ -1,4 +1,4 @@
 # Tugas-Teknologi-Sistem-Terintegrasi
 
-docker image build --tag demo-konsultasidesain .
-docker container run --publish 8000:8000 --name demo-konsultasi-jasa-desain demo-konsultasidesain
+docker build -t demo-desain .
+docker run -d --name demo-konsul-desain -p 80:80 demo-desain
