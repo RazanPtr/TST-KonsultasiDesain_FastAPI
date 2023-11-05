@@ -127,30 +127,34 @@ async def add_items(items: dict):
 
     return "Add data successfully"
 
-@app.put('/desain')
-async def update_desain(item: Item):
-	item_dict = item.dict()
-	item_found = False
-	for desain_idx, desain_item in enumerate(data['desain']):
-		if desain_item['id'] == item_dict['id']:
-			item_found = True
-			data['desain'].append({
-				"id": item_dict["id"],
-				"name": item_dict["name"],
-				"deskripsi": item_dict["deskripsi"],
-				"tanggalpesan": item_dict["tanggalpesan"],
-				"status": item_dict["status"]
-			})
-			
-			with open(json_filename,"w") as write_file:
-				json.dump(data, write_file, indent=4)
-			return "updated"
-	
-	if not item_found:
-		return "desain ID not found."
-	raise HTTPException(
-		status_code=404, detail=f'item not found'
-	)
+@app.put('/desain/{item_id}')
+async def update_desain(item_id: int, item: Item):
+    item_dict = item.dict()
+    item_found = False
+    
+    for desain_idx, desain_item in enumerate(data['desain']):
+        if desain_item['id'] == item_id:
+            item_found = True
+            data['desain'][desain_idx] = {
+                "name": item_dict["name"],
+                "deskripsi": item_dict["deskripsi"],
+                "tanggalpesan": item_dict["tanggalpesan"],
+                "status": item_dict["status"],
+                "id": item_id
+            }
+            
+            with open(json_filename, "w") as write_file:
+                json.dump(data, write_file, indent=4)
+            
+            return "updated"
+    
+    if not item_found:
+        return "desain ID not found."
+    
+    raise HTTPException(
+        status_code=404, detail=f'item not found'
+    )
+
 
 @app.delete('/desain/{item_id}')
 async def delete_desain(item_id: int):
