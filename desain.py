@@ -75,15 +75,6 @@ async def read_all():
 
     return merged_data_list
 
-@app.get('/desain/{item_id}')
-async def read_desain(item_id: int):
-	for desain_item in data['desain']:
-		if desain_item['id'] == item_id:
-			return desain_item
-	raise HTTPException(
-		status_code=404, detail=f'desain not found'
-	)
-
 @app.get('/konsuldesain/{item_id}')
 async def read_konsuldesain(item_id: int):
 	for desain_item in data['konsuldesain']:
@@ -92,52 +83,6 @@ async def read_konsuldesain(item_id: int):
 	raise HTTPException(
 		status_code=404, detail=f'desainer not found'
 	)
-
-# @app.post('/desain')
-# async def add_desain(item: Item):
-#     item_dict = item.dict()
-
-#     # Cek apakah ID sudah ada
-#     for desain_item in data['desain']:
-#         if desain_item['id'] == item_dict['id']:
-#             raise HTTPException(
-#                 status_code=400, detail=f'Desain ID {item_dict["id"]} already exists'
-#             )
-
-#     # Jika ID belum ada, tambahkan desain baru
-#     data['desain'].append({
-#         "id": item_dict["id"],
-#         "name": item_dict["name"],
-#         "deskripsi": item_dict["deskripsi"],
-#         "tanggalpesan": item_dict["tanggalpesan"],
-#         "status": item_dict["status"]
-#     })
-
-#     write_data(data)
-
-#     return item_dict
-
-# @app.post('/konsuldesain')
-# async def add_desain(konsul: Konsul):
-#     konsul_dict = konsul.dict()
-
-#     # Cek apakah ID sudah ada
-#     for desain_item in data['konsuldesain']:
-#         if desain_item['id_desainer'] == konsul_dict['id_desainer']:
-#             raise HTTPException(
-#                 status_code=400, detail=f'Desain ID {konsul_dict["id_desainer"]} already exists'
-#             )
-
-#     # Jika ID belum ada, tambahkan desain baru
-#     data['konsuldesain'].append({
-#         "id_desainer": konsul_dict["id_desainer"],
-#         "nama": konsul_dict["nama"],
-#         "nohp": konsul_dict["nohp"]
-#     })
-
-#     write_data(data)
-
-#     return konsul_dict
 
 @app.post('/')
 async def add_items(items: dict):
@@ -206,25 +151,6 @@ async def update_desain(item: Item):
 	raise HTTPException(
 		status_code=404, detail=f'item not found'
 	)
-
-# @app.delete('/desain/{item_id}')
-# async def delete_desain(item_id: int):
-
-# 	item_found = False
-# 	for desain_idx, desain_item in enumerate(data['desain']):
-# 		if desain_item['id'] == item_id:
-# 			item_found = True
-# 			data['desain'].pop(desain_idx)
-			
-# 			with open(json_filename,"w") as write_file:
-# 				json.dump(data, write_file)
-# 			return "updated"
-	
-# 	if not item_found:
-# 		return "desain ID not found."
-# 	raise HTTPException(
-# 		status_code=404, detail=f'item not found'
-# 	)
 
 @app.delete('/desain/{item_id}')
 async def delete_desain(item_id: int):
