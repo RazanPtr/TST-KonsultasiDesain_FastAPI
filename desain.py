@@ -155,7 +155,6 @@ async def update_desain(item_id: int, item: Item):
         status_code=404, detail=f'item not found'
     )
 
-
 @app.delete('/desain/{item_id}')
 async def delete_desain(item_id: int):
     item_found = False
@@ -189,6 +188,32 @@ async def delete_desain(item_id: int):
                     data['konsuldesain'].remove(foreign_key)
             
             with open(json_filename,"w") as write_file:
+                json.dump(data, write_file, indent=4)
+            
+            return "updated"
+    
+    if not item_found:
+        return "desain ID not found."
+    
+    raise HTTPException(
+        status_code=404, detail=f'item not found'
+    )
+
+@app.put('/konsuldesain/{item_id}')
+async def update_konsuldesain(item_id: int, item: Konsul):
+    item_dict = item.dict()
+    item_found = False
+    
+    for desain_idx, desain_item in enumerate(data['konsuldesain']):
+        if desain_item['id_desainer'] == item_id:
+            item_found = True
+            data['konsuldesain'][desain_idx] = {
+                "nama": item_dict["nama"],
+                "nohp": item_dict["nohp"],
+                "id_desainer": item_id
+            }
+            
+            with open(json_filename, "w") as write_file:
                 json.dump(data, write_file, indent=4)
             
             return "updated"
