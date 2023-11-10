@@ -27,13 +27,6 @@
             "tanggalpesan": "21-09-2022",
             "status": "completed",
             "id": 4
-        },
-        {
-            "name": "greendays",
-            "deskripsi": "desain dengan nuansa penuh kehijauan",
-            "tanggalpesan": "20-09-2023",
-            "status": "under review",
-            "id": 5
         }
     ],
     "permintaan": [
@@ -52,10 +45,6 @@
         {
             "id": 4,
             "id_desainer": 4
-        },
-        {
-            "id": 5,
-            "id_desainer": 5
         }
     ],
     "konsuldesain": [
@@ -78,11 +67,18 @@
             "nama": "frank",
             "nohp": 6287879315123,
             "id_desainer": 4
+        }
+    ],
+    "user": [
+        {
+            "id": 1,
+            "username": "test",
+            "password_hash": "$2b$12$1bJLZBwbiWS5qbvVmjM4xezWHHJpHtzZ7U7lxtni59DFC659Q5CH2"
         },
         {
-            "nama": "bubu",
-            "nohp": 6287899215123,
-            "id_desainer": 5
+            "id": 2,
+            "username": "razan",
+            "password_hash": "$2b$12$e0mGWHM4DtR79s7yf0/sBuO9AL/y9Ij2EKr8YGvh7R/53hcgTfqbu"
         }
     ]
 }
