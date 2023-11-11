@@ -1,14 +1,15 @@
-from fastapi import FastAPI, HTTPException, Depends, status, APIRouter, Request
+from fastapi import FastAPI, HTTPException, Depends, status, APIRouter, Request, Form
 from fastapi.encoders import jsonable_encoder
 import json
 from pydantic import BaseModel
 import jwt
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.hash import bcrypt
+from typing import List
 
 class Item(BaseModel):
 	id: int
-	name: str
+	desainname: str
 	deskripsi: str
 	tanggalpesan: str
 	status: str
@@ -19,7 +20,7 @@ class Permintaan(BaseModel):
 
 class Konsul(BaseModel):
 	id_desainer: int
-	nama: str
+	namadesainer: str
 	nohp: int
 
 class User:
@@ -137,11 +138,11 @@ async def read_all(user: User = Depends(get_current_user)):
                 if (desain_item['id'] == desain_permintaan['id'] and
                     desain_permintaan['id_desainer'] == desain_desainer['id_desainer']):
                     merged_data = {
-                        'name': desain_item['name'],
+                        'desainname': desain_item['desainname'],
                         'desc': desain_item['deskripsi'],
                         'tanggalpesan': desain_item['tanggalpesan'],
                         'status': desain_item['status'],
-                        'nama_desainer': desain_desainer['nama'],
+                        'nama_desainer': desain_desainer['namadesainer'],
                         'nohp': desain_desainer['nohp']
                     }
                     merged_data_list.append(merged_data)
@@ -163,11 +164,15 @@ async def read_konsuldesain(item_id: int, user: User = Depends(get_current_user)
 	)
 
 @alldesain.post('/alldata')
-async def add_items(items: dict, user: User = Depends(get_current_user)):
-    konsul_dict = items.get('konsuldesain', {})
-    item_dict = items.get('desain', {})
-    permintaan_dict = items.get('permintaan', {})
-
+async def add_items(
+    desainname: str = Form(...),
+    deskripsi: str = Form(...),
+    tanggalpesan: str = Form(...),
+    status: str = Form(...),
+    namadesainer: str = Form(...),
+    nohp: int = Form(...),
+    user: User = Depends(get_current_user)
+):
     # Mendapatkan ID terakhir untuk masing-masing tabel
     last_desain_id = data['desain'][-1]['id'] if data['desain'] else 0
     last_permintaan_id = data['permintaan'][-1]['id'] if data['permintaan'] else 0
@@ -175,49 +180,68 @@ async def add_items(items: dict, user: User = Depends(get_current_user)):
     last_permintaan_id_desainer = data['permintaan'][-1]['id_desainer'] if data['permintaan'] else 0
 
     # Memastikan bahwa ID pada tabel desain dan tabel permintaan adalah sama
-    item_dict["id"] = last_desain_id + 1
-    permintaan_dict["id"] = last_permintaan_id + 1
-    konsul_dict["id_desainer"] = last_konsuldesain_id + 1
-    permintaan_dict["id_desainer"] = last_permintaan_id_desainer + 1
+    desain_id = last_desain_id + 1
+    permintaan_id = last_permintaan_id + 1
+    konsuldesain_id = last_konsuldesain_id + 1
+    permintaan_id_desainer = last_permintaan_id_desainer + 1
 
+    # Memastikan ID belum digunakan
     for desain_item in data['konsuldesain']:
-        if desain_item['id_desainer'] == konsul_dict['id_desainer']:
+        if desain_item['id_desainer'] == konsuldesain_id:
             raise HTTPException(
-                status_code=400, detail=f'Desain ID {konsul_dict["id_desainer"]} already exists'
+                status_code=400, detail=f'Desain ID {konsuldesain_id} already exists'
             )
 
     for desain_item in data['desain']:
-        if desain_item['id'] == item_dict['id']:
+        if desain_item['id'] == desain_id:
             raise HTTPException(
-                status_code=400, detail=f'Desain ID {item_dict["id"]} already exists'
+                status_code=400, detail=f'Desain ID {desain_id} already exists'
             )
-			
+
+    # Menambahkan data ke masing-masing tabel
     data['permintaan'].append({
-        "id": permintaan_dict["id"],
-        "id_desainer": permintaan_dict["id_desainer"]
+        "id": permintaan_id,
+        "id_desainer": permintaan_id_desainer
     })
 
-    data['konsuldesain'].append(konsul_dict)
+    data['konsuldesain'].append({
+        "namadesainer": namadesainer,
+        "nohp": nohp,
+        "id_desainer": konsuldesain_id
+    })
 
-    data['desain'].append(item_dict)
+    data['desain'].append({
+        "desainname": desainname,
+        "deskripsi": deskripsi,
+        "tanggalpesan": tanggalpesan,
+        "status": status,
+        "id": desain_id
+    })
 
+    # Menyimpan data ke file
     write_data(data)
 
     return "Add data successfully"
 
 @desain.put('/desain/{item_id}')
-async def update_desain(item_id: int, item: Item, user: User = Depends(get_current_user)):
-    item_dict = item.dict()
+async def update_desain(
+    item_id: int,
+    desainname: str = Form(...),
+    deskripsi: str = Form(...),
+    tanggalpesan: str = Form(...),
+    status: str = Form(...),
+    user: User = Depends(get_current_user)
+):
     item_found = False
     
     for desain_idx, desain_item in enumerate(data['desain']):
         if desain_item['id'] == item_id:
             item_found = True
             data['desain'][desain_idx] = {
-                "name": item_dict["name"],
-                "deskripsi": item_dict["deskripsi"],
-                "tanggalpesan": item_dict["tanggalpesan"],
-                "status": item_dict["status"],
+                "name": desainname,
+                "deskripsi": deskripsi,
+                "tanggalpesan": tanggalpesan,
+                "status": status,
                 "id": item_id
             }
             
@@ -234,16 +258,20 @@ async def update_desain(item_id: int, item: Item, user: User = Depends(get_curre
     )
 
 @konsuldesain.put('/konsuldesain/{item_id}')
-async def update_desain(item_id: int, item: Konsul, user: User = Depends(get_current_user)):
-    item_dict = item.dict()
+async def update_konsuldesain(
+    item_id: int,
+    namadesainer: str = Form(...),
+    nohp: int = Form(...),
+    user: User = Depends(get_current_user)
+):
     item_found = False
     
     for desain_idx, desain_item in enumerate(data['konsuldesain']):
         if desain_item['id_desainer'] == item_id:
             item_found = True
             data['konsuldesain'][desain_idx] = {
-                "nama": item_dict["nama"],
-                "nohp": item_dict["nohp"],
+                "namadesainer": namadesainer,
+                "nohp": nohp,
                 "id_desainer": item_id
             }
             
@@ -303,28 +331,56 @@ async def delete_desain(item_id: int, user: User = Depends(get_current_user)):
         status_code=404, detail=f'item not found'
     )
 
-@konsuldesain.put('/konsuldesain/{item_id}')
-async def update_konsuldesain(item_id: int, item: Konsul, user: User = Depends(get_current_user)):
-    item_dict = item.dict()
+@desain.patch('/desain/{item_id}')
+async def patch_desain(item_id: int, fields_to_update: List[dict], user: User = Depends(get_current_user)):
     item_found = False
-    
+
+    for desain_idx, desain_item in enumerate(data['desain']):
+        if desain_item['id'] == item_id:
+            item_found = True
+
+            # Perbarui nilai-nilai yang diberikan dalam fields_to_update
+            for field_update in fields_to_update:
+                field_name = field_update.get('field')
+                new_value = field_update.get('value')
+                if field_name and field_name in desain_item:
+                    desain_item[field_name] = new_value
+
+            with open(json_filename, "w") as write_file:
+                json.dump(data, write_file, indent=4)
+
+            return "updated"
+
+    if not item_found:
+        return "desain ID not found."
+
+    raise HTTPException(
+        status_code=404, detail=f'item not found'
+    )
+
+@konsuldesain.patch('/konsuldesain/{item_id}')
+async def patch_desain(item_id: int, fields_to_update: List[dict], user: User = Depends(get_current_user)):
+    item_found = False
+
     for desain_idx, desain_item in enumerate(data['konsuldesain']):
         if desain_item['id_desainer'] == item_id:
             item_found = True
-            data['konsuldesain'][desain_idx] = {
-                "nama": item_dict["nama"],
-                "nohp": item_dict["nohp"],
-                "id_desainer": item_id
-            }
-            
+
+            # Perbarui nilai-nilai yang diberikan dalam fields_to_update
+            for field_update in fields_to_update:
+                field_name = field_update.get('field')
+                new_value = field_update.get('value')
+                if field_name and field_name in desain_item:
+                    desain_item[field_name] = new_value
+
             with open(json_filename, "w") as write_file:
                 json.dump(data, write_file, indent=4)
-            
-            return "deleted"
-    
+
+            return "updated"
+
     if not item_found:
         return "desain ID not found."
-    
+
     raise HTTPException(
         status_code=404, detail=f'item not found'
     )

@@ -1,32 +1,39 @@
 {
     "desain": [
         {
-            "name": "minimalist",
+            "desainname": "minimalist",
             "deskripsi": "desain ini cocok untuk halaman berukuran kecil",
             "tanggalpesan": "11-02-2023",
             "status": "on progress",
             "id": 1
         },
         {
-            "name": "oldgarden",
+            "desainname": "oldgarden",
             "deskripsi": "desain dengan gaya lama",
             "tanggalpesan": "15-05-2023",
             "status": "under review",
             "id": 2
         },
         {
-            "name": "greendays",
+            "desainname": "greendays",
             "deskripsi": "desain dengan nuansa penuh kehijauan",
             "tanggalpesan": "10-09-2023",
             "status": "on progress",
             "id": 3
         },
         {
-            "name": "modern",
+            "desainname": "modern",
             "deskripsi": "desain dengan gaya kekinian",
             "tanggalpesan": "21-09-2022",
             "status": "completed",
             "id": 4
+        },
+        {
+            "name": "modern",
+            "deskripsi": "desain dengan gaya kekinian",
+            "tanggalpesan": "21-09-2022",
+            "status": "completed",
+            "id": 5
         }
     ],
     "permintaan": [
@@ -45,28 +52,37 @@
         {
             "id": 4,
             "id_desainer": 4
+        },
+        {
+            "id": 5,
+            "id_desainer": 5
         }
     ],
     "konsuldesain": [
         {
-            "nama": "budi",
+            "namadesainer": "budi",
             "nohp": 6287787624213,
             "id_desainer": 1
         },
         {
-            "nama": "asep",
+            "namadesainer": "asep",
             "nohp": 6285921029201,
             "id_desainer": 2
         },
         {
-            "nama": "yusep",
+            "namadesainer": "yusep",
             "nohp": 621334567865,
             "id_desainer": 3
         },
         {
-            "nama": "frank",
+            "namadesainer": "frank",
             "nohp": 6287879315123,
             "id_desainer": 4
+        },
+        {
+            "namadesainer": "acet",
+            "nohp": 123454321432,
+            "id_desainer": 5
         }
     ],
     "user": [
