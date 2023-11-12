@@ -139,7 +139,7 @@ async def read_all(user: User = Depends(get_current_user)):
                     desain_permintaan['id_desainer'] == desain_desainer['id_desainer']):
                     merged_data = {
                         'desainname': desain_item['desainname'],
-                        'desc': desain_item['deskripsi'],
+                        'deskripsi': desain_item['deskripsi'],
                         'tanggalpesan': desain_item['tanggalpesan'],
                         'status': desain_item['status'],
                         'nama_desainer': desain_desainer['namadesainer'],
