@@ -1,5 +1,6 @@
 FROM python:3.9
 ADD desain.py .
+ADD reqpsyco.py .
 COPY . /app
 WORKDIR /app
 

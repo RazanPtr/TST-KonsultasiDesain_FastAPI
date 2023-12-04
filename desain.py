@@ -1,27 +1,39 @@
 from fastapi import FastAPI, HTTPException, Depends, status, APIRouter, Request, Form
 from fastapi.encoders import jsonable_encoder
+from fastapi.middleware.cors import CORSMiddleware
 import json
 from pydantic import BaseModel
 import jwt
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.hash import bcrypt
 from typing import List
+from reqpsyco import get_psychologist_list, get_user_list
+from pymongo import MongoClient
 
-class Item(BaseModel):
-	id: int
-	desainname: str
-	deskripsi: str
-	tanggalpesan: str
-	status: str
+client = MongoClient("mongodb+srv://18221132:123@tstdesain.olxinss.mongodb.net/?retryWrites=true&w=majority")
+db = client['IntegrasiDesain']
+collection = db['desain']
 
-class Permintaan(BaseModel):
-    id: int
-    id_desainer: int
+data = collection.find_one()
 
-class Konsul(BaseModel):
-	id_desainer: int
-	namadesainer: str
-	nohp: int
+def write_data(data):
+    collection.replace_one({}, data, upsert=True)
+
+# class Item(BaseModel):
+# 	id: int
+# 	desainname: str
+# 	deskripsi: str
+# 	tanggalpesan: str
+# 	status: str
+
+# class Permintaan(BaseModel):
+#     id: int
+#     id_desainer: int
+
+# class Konsul(BaseModel):
+# 	id_desainer: int
+# 	namadesainer: str
+# 	nohp: int
 
 class User:
     def __init__(self, id, username, password_hash):
@@ -32,23 +44,25 @@ class User:
     def verify_password(self, password):
         return bcrypt.verify(password, self.password_hash)
 
-json_filename="desain.json"
-
-with open(json_filename, "r") as read_file:
-    data = json.load(read_file)
-
-def write_data(data):
-    with open(json_filename, "w") as write_file:
-        json.dump(data, write_file, indent=4)
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
 app = FastAPI()
 JWT_SECRET = 'myjwtsecret'
 ALGORITHM = 'HS256'
 
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+psychology = APIRouter(tags=["Psikologis"])
 desain = APIRouter(tags=["Desain"], )
 konsuldesain = APIRouter(tags=["Konsul Desain"])
-alldesain = APIRouter(tags=["All Data"])
+alldesain = APIRouter(tags=["All Desain Data"])
 authentication = APIRouter(tags=["Authentication"])
 
 def get_user_by_username(username):
@@ -97,11 +111,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         )
 
 @authentication.post('/users')
-async def create_user(username: str, password: str):
+async def create_user(username: str = Form(...), password: str = Form(...)):
     last_user_id = data['user'][-1]['id'] if data['user'] else 0
     user_id = last_user_id + 1
-    user = jsonable_encoder(User(id=user_id, username=username, password_hash=bcrypt.hash(password)))
-    data['user'].append(user)
+    user = User(id=user_id, username=username, password_hash=bcrypt.hash(password))
+    data['user'].append(jsonable_encoder(user))
     write_data(data)
     return {'message': 'User created successfully'}
 
@@ -113,7 +127,7 @@ async def get_user(user: User = Depends(get_current_user)):
 async def read_desain(user: User = Depends(get_current_user)):
 	return data['desain']
 
-@desain.get('/desain/{status}')
+@desain.get('/desain/{status}', description="under review, on progress, completed")
 async def read_desain_status(status: str, user: User = Depends(get_current_user)):
 	list_status = []
 	for desain_status in data['desain']:
@@ -129,7 +143,7 @@ async def read_konsuldesain(user: User = Depends(get_current_user)):
 	return data['konsuldesain']
 
 @alldesain.get('/alldata')
-async def read_all(user: User = Depends(get_current_user)):
+async def read_all_desain_data(user: User = Depends(get_current_user)):
     merged_data_list = []
 
     for desain_item in data['desain']:
@@ -139,7 +153,6 @@ async def read_all(user: User = Depends(get_current_user)):
                     desain_permintaan['id_desainer'] == desain_desainer['id_desainer']):
                     merged_data = {
                         'desainname': desain_item['desainname'],
-                        'deskripsi': desain_item['deskripsi'],
                         'tanggalpesan': desain_item['tanggalpesan'],
                         'status': desain_item['status'],
                         'nama_desainer': desain_desainer['namadesainer'],
@@ -164,9 +177,8 @@ async def read_konsuldesain(item_id: int, user: User = Depends(get_current_user)
 	)
 
 @alldesain.post('/alldata')
-async def add_items(
+async def add_desain_items(
     desainname: str = Form(...),
-    deskripsi: str = Form(...),
     tanggalpesan: str = Form(...),
     status: str = Form(...),
     namadesainer: str = Form(...),
@@ -212,7 +224,6 @@ async def add_items(
 
     data['desain'].append({
         "desainname": desainname,
-        "deskripsi": deskripsi,
         "tanggalpesan": tanggalpesan,
         "status": status,
         "id": desain_id
@@ -227,7 +238,6 @@ async def add_items(
 async def update_desain(
     item_id: int,
     desainname: str = Form(...),
-    deskripsi: str = Form(...),
     tanggalpesan: str = Form(...),
     status: str = Form(...),
     user: User = Depends(get_current_user)
@@ -239,14 +249,12 @@ async def update_desain(
             item_found = True
             data['desain'][desain_idx] = {
                 "name": desainname,
-                "deskripsi": deskripsi,
                 "tanggalpesan": tanggalpesan,
                 "status": status,
                 "id": item_id
             }
             
-            with open(json_filename, "w") as write_file:
-                json.dump(data, write_file, indent=4)
+            write_data(data)
             
             return "updated"
     
@@ -275,8 +283,7 @@ async def update_konsuldesain(
                 "id_desainer": item_id
             }
             
-            with open(json_filename, "w") as write_file:
-                json.dump(data, write_file, indent=4)
+            write_data(data)
             
             return "updated"
     
@@ -319,8 +326,7 @@ async def delete_desain(item_id: int, user: User = Depends(get_current_user)):
                 if foreign_key in data['konsuldesain']:
                     data['konsuldesain'].remove(foreign_key)
             
-            with open(json_filename,"w") as write_file:
-                json.dump(data, write_file, indent=4)
+            write_data(data)
             
             return "deleted"
     
@@ -346,8 +352,7 @@ async def patch_desain(item_id: int, fields_to_update: List[dict], user: User = 
                 if field_name and field_name in desain_item:
                     desain_item[field_name] = new_value
 
-            with open(json_filename, "w") as write_file:
-                json.dump(data, write_file, indent=4)
+            write_data(data)
 
             return "updated"
 
@@ -373,8 +378,7 @@ async def patch_desain(item_id: int, fields_to_update: List[dict], user: User = 
                 if field_name and field_name in desain_item:
                     desain_item[field_name] = new_value
 
-            with open(json_filename, "w") as write_file:
-                json.dump(data, write_file, indent=4)
+            write_data(data)
 
             return "updated"
 
@@ -385,11 +389,54 @@ async def patch_desain(item_id: int, fields_to_update: List[dict], user: User = 
         status_code=404, detail=f'item not found'
     )
 
-if __name__ == '__main__':
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+@psychology.get('/Psychologist/{specialty}', description="Depression and Anxiety, Family Conflict Resolution, Child and Adolescent Counseling ,Substance Abuse and Addiction, Marriage and Couples Counseling, Stress Management, Anxiety Disorders")
+async def get_psychologist_specialty(specialty: str ,User = Depends(get_current_user)):
+    psyc = []
+    for psy in get_psychologist_list():
+        if psy['specialty'] == specialty:
+            psyc.append(psy)
+    return psyc
+
+@psychology.get('/MatchUserAvailability', description="Match the user and psychologist availability to get consultation")
+async def match_user_availability(name: str,User = Depends(get_current_user)):
+    psychologist = []
+    try:
+        for psy in get_user_list():
+            if psy['username'] == name:
+                for psyc in get_psychologist_list():
+                        if psy['day'] == psyc['availability']:
+                            psychologist.append(psyc)
+                        else:
+                            pass
+                if len(psychologist) == 0:
+                    return 'Not available day for the moment'
+                else:
+                    return psychologist
+    except:
+        return 'User '+name+' not found'
+
+@psychology.get('/DesainRecommendation', description="We provide design recommendation based on user psychology preference")
+async def get_desain_recommendation(user_psychology_name: str, User = Depends(get_current_user)):
+    try:
+        for user in get_user_list():
+            if user['username'] == user_psychology_name:
+                for desain in data['detail']:
+                    if user['preference'] == desain['preferensi']:
+                        return desain
+                    elif user['preference'] == "-":
+                        return "user doesn't have psychology preference"
+    except:
+        return 'User '+user_psychology_name+' not found'
+
+@psychology.get('/UserPsychology', description="First three user is an admin, they don't have any psychology preference")
+async def get_psychologist_user():
+    user_list=[]
+    for user in get_user_list():
+        user_list.append({k: user[k] for k in ('username', 'email', 'date_of_birth', 'day', 'tags')})
+    return user_list
 
 app.include_router(authentication)
 app.include_router(desain)
 app.include_router(konsuldesain)
 app.include_router(alldesain)
+app.include_router(psychology)
