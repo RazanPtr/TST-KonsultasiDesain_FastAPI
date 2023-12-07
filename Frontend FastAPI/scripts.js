@@ -56,11 +56,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const username = document.getElementById("username-login").value;
         const password = document.getElementById("password-login").value;
     
-        if (!username || !password) {
-        showNotification("Please fill in both username and password.");
-        return;
-        }
-    
         try {
         const response = await fetch("https://desain-psikologi-fastapi.whitecliff-184c41f4.southeastasia.azurecontainerapps.io/token", {
             method: "POST",
@@ -77,6 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
             loginloading.style.backgroundColor = '';
             loginloading.style.color = '';
             loginloading.value = 'Login';
+
         } else {
             const errorData = await response.json();
             showNotification("Invalid username or password");
@@ -96,12 +92,7 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
         const username = document.getElementById("username-signup").value;
         const password = document.getElementById("password-signup").value;
-
-        // Check if username and password are not empty
-        if (!username || !password) {
-            showNotification("Please fill in both username and password.");
-            return;
-        }
+        const email = document.getElementById("email-signup").value;
 
         const formData = new FormData();
         formData.append("username", username);
@@ -115,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 body: new URLSearchParams(formData),
             });
-            if (response.ok) {
+            if (response.ok && email) {
                 // User registered successfully, show success message
                 showNotificationOk("User registered successfully.");
                 // Redirect to sign-in page
@@ -132,9 +123,15 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 // Registration failed, show error message
                 showNotification("Registration failed. Please try again.");
+                document.getElementById('signup-btn').style.backgroundColor = '';
+                document.getElementById('signup-btn').style.color = '';
+                document.getElementById('signup-btn').value = 'Sign up';
             }
         } catch (error) {
             console.error("Error during registration:", error.message);
+            document.getElementById('signup-btn').style.backgroundColor = '';
+            document.getElementById('signup-btn').style.color = '';
+            document.getElementById('signup-btn').value = 'Sign up';
         }
     });
 });
