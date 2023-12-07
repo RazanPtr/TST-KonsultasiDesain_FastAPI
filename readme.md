@@ -7,4 +7,6 @@ Microservice yang diambil yaitu merupakan core dari bisnis yang dibuat yaitu jas
 docker build -t demo-desain .
 docker run -d --name demo-konsul-desain -p 80:80 demo-desain
 
-Keterangan: Penjelasan lebih lanjut terdapat di file dokumen.
+Keterangan: 
+- Penjelasan lebih lanjut terdapat di file dokumen.
+- Saat pertama kali membuka website, proses login atau register akan cukup lama jadi disarankan menunggu sekitar 10-15 detik saat website pertama kali dibuka
