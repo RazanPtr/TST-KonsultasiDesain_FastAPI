@@ -284,6 +284,14 @@ form.sign-in-form {
   pointer-events: all;
 }
 
+#loading {
+  display: none;
+}
+
+#loading2 {
+  display: none;
+}
+
 @media (max-width: 870px) {
   .container {
     min-height: 800px;

@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const signInForm = document.querySelector(".sign-in-form");
     const signUpForm = document.querySelector(".sign-up-form");
     const notificationElement = document.getElementById('notification');
+    const loadingDiv = document.getElementById('loading');
+    const loadingDiv2 = document.getElementById('loading2');
 
     sign_up_btn.addEventListener("click", () => {
     container.classList.add("sign-up-mode");
@@ -31,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
         notificationElement.style.borderColor = '#c3e6cb';
         notificationElement.style.color = '#155724';
         notificationElement.style.display = 'block';
-
+        
         setTimeout(function () {
             notificationElement.style.display = 'none';
         }, 2000);
@@ -55,7 +57,11 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             body: `username=${username}&password=${password}`,
         });
-    
+        loadingDiv.style.display = 'inline';
+            setTimeout(() => {
+                loadingDiv.style.display = 'none';
+                this.style = "background: #f1f5f4; color: #333; pointer-events: none;";
+            }, 1000);
         if (response.ok) {
             showNotificationOk("Welcome to design service")
             window.location.href = "https://desain-psikologi-fastapi.whitecliff-184c41f4.southeastasia.azurecontainerapps.io/docs";
@@ -93,16 +99,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 body: new URLSearchParams(formData),
             });
-
+            loadingDiv2.style.display = 'inline';
+                setTimeout(() => {
+                    loadingDiv2.style.display = 'none';
+                    this.style = "background: #f1f5f4; color: #333; pointer-events: none;";
+                }, 1000);
             if (response.ok) {
                 // User registered successfully, show success message
+                loadingDiv2.style.display = 'inline';
+                setTimeout(() => {
+                    loadingDiv2.style.display = 'none';
+                    this.style = "background: #f1f5f4; color: #333; pointer-events: none;";
+                }, 1000);
                 showNotificationOk("User registered successfully.");
-
                 // Redirect to sign-in page
                 container.classList.remove("sign-up-mode");
-
+                
                 // Clear input fields
                 document.getElementById("username-signup").value = "";
+                document.getElementById("email-signup").value = "";
                 document.getElementById("password-signup").value = "";
             } else {
                 // Registration failed, show error message

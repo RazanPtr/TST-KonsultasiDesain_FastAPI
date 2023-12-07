@@ -428,11 +428,11 @@ async def get_desain_recommendation(user_psychology_name: str, User = Depends(ge
     except:
         return 'User '+user_psychology_name+' not found'
 
-@psychology.get('/UserPsychology', description="First three user is an admin, they don't have any psychology preference")
+@psychology.get('/UserPsychology', description="First three users is an admin, they don't have any psychology preference")
 async def get_psychologist_user():
     user_list=[]
     for user in get_user_list():
-        user_list.append({k: user[k] for k in ('username', 'email', 'date_of_birth', 'day', 'tags')})
+        user_list.append({k: user[k] for k in ('username', 'email', 'day', 'preference', 'tags')})
     return user_list
 
 app.include_router(authentication)
